@@ -32,7 +32,9 @@
 #define T3_STACK_START         (SRAM_END - (2 * SIZE_TASK_STACK))
 #define T4_STACK_START         (SRAM_END - (3 * SIZE_TASK_STACK))
 #define IDLE_STACK_START       (SRAM_END - (4 * SIZE_TASK_STACK))
-
+uint32_t get_psp_value(void);
+void save_psp_value(uint32_t currentPspValue);
+void unblock_tasks(void);
 
 typedef struct
 {

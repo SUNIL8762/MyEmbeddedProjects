@@ -4,9 +4,30 @@ extern TCB_t userTasks[MAX_TASKS];
 extern uint8_t currentTask;
 extern uint32_t globalTickCount;
 
+/* Cortex-M System Handler Control and State Register */
+#define SHCSR (*(volatile uint32_t*)0xE000ED24U)
+
+/* Enable UsageFault, BusFault, MemManage Fault */
+void enable_processor_faults(void)
+{
+    SHCSR |= (1U << 16);
+    SHCSR |= (1U << 17);
+    SHCSR |= (1U << 18);
+}
+
+static inline void disable_irq(void)
+{
+    __asm volatile ("cpsid i");
+}
+
+static inline void enable_irq(void)
+{
+    __asm volatile ("cpsie i");
+}
+
 void init_scheduler_stack(uint32_t schedTopOfStack)
 {
-    __asm volatile("MSR MSP,%0" : : "r"(schedTopOfStack) : );
+    __asm volatile("MSR MSP,%0" : : "r"(schedTopOfStack));
 }
 
 void init_tasks_stack(void)
@@ -19,32 +40,30 @@ void init_tasks_stack(void)
     {
         userTasks[i].currentState = TASK_READY_STATE;
 
-        psp--;
-        *psp = DUMMY_XPSR;
+        /* xPSR */
+        *(--psp) = DUMMY_XPSR;
 
-        psp--;
-        *psp = (uint32_t)userTasks[i].taskHandler;
+        /* PC */
+        *(--psp) = (uint32_t)userTasks[i].taskHandler;
 
-        psp--;
-        *psp = 0xFFFFFFFD;
+        /* LR */
+        *(--psp) = 0xFFFFFFFD;
 
         /* R12,R3,R2,R1,R0 */
         for(int j = 0; j < 5; j++)
         {
-            psp--;
-            *psp = 0;
+            *(--psp) = 0;
         }
 
-        /* R4-R11 */
+        /* R11-R4 */
         for(int j = 0; j < 8; j++)
         {
-            psp--;
-            *psp = 0;
+            *(--psp) = 0;
         }
 
         userTasks[i].pspValue = (uint32_t)psp;
 
-        psp = psp - SIZE_TASK_STACK;
+        psp -= SIZE_TASK_STACK;
     }
 }
 
@@ -61,24 +80,23 @@ void save_psp_value(uint32_t currentPspValue)
 void switch_sp_to_psp(void)
 {
     __asm volatile(
-        "PUSH {LR}          \n"
-        "BL get_psp_value   \n"
-        "MSR PSP,R0         \n"
-        "POP {LR}           \n"
-        "MOV R0,#0x02       \n"
-        "MSR CONTROL,R0     \n"
-        "BX LR              \n"
+        "PUSH {LR}        \n"
+        "BL get_psp_value \n"
+        "MSR PSP,R0       \n"
+        "POP {LR}         \n"
+        "MOV R0,#0x02     \n"
+        "MSR CONTROL,R0   \n"
+        "BX LR            \n"
     );
 }
 
 void update_next_task(void)
 {
-    uint8_t state = TASK_BLOCKED_STATE;
+    uint8_t state;
 
     for(uint32_t i = 0; i < MAX_TASKS; i++)
     {
         currentTask++;
-
         currentTask %= MAX_TASKS;
 
         state = userTasks[currentTask].currentState;
@@ -92,20 +110,20 @@ void update_next_task(void)
 
 void task_delay(uint32_t tickCount)
 {
-    __disable_irq();
+    disable_irq();
 
     if(currentTask)
     {
         userTasks[currentTask].blockCount =
-                globalTickCount + tickCount;
+            globalTickCount + tickCount;
 
         userTasks[currentTask].currentState =
-                TASK_BLOCKED_STATE;
+            TASK_BLOCKED_STATE;
 
         schedule();
     }
 
-    __enable_irq();
+    enable_irq();
 }
 
 void unblock_tasks(void)
@@ -117,7 +135,7 @@ void unblock_tasks(void)
             if(userTasks[i].blockCount <= globalTickCount)
             {
                 userTasks[i].currentState =
-                        TASK_READY_STATE;
+                    TASK_READY_STATE;
             }
         }
     }
