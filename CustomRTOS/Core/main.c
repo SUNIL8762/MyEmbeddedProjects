@@ -1,4 +1,5 @@
 #include "rtos.h"
+#include "gpio.h"
 
 void task1_handler(void);
 void task2_handler(void);
@@ -14,9 +15,10 @@ uint32_t globalTickCount = 0;
 
 int main(void)
 {
+    gpio_init();
     enable_processor_faults();
 
-    init_scheduler_stack(T1_STACK_START);
+    //init_scheduler_stack(T1_STACK_START);
 
     userTasks[0].taskHandler = idle_task;
     userTasks[1].taskHandler = task1_handler;
@@ -39,6 +41,8 @@ void task1_handler(void)
 {
     while(1)
     {
+        
+        gpio_toggle();
         for(uint32_t i = 0; i < 100000; i++);
     }
 }

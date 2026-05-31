@@ -10,8 +10,17 @@ _estack = ORIGIN(SRAM) + LENGTH(SRAM);
 
 SECTIONS
 {
+    .isr_vector :
+    {
+        . = ALIGN(4);
+        KEEP(*(.isr_vector))
+        . = ALIGN(4);
+    } > FLASH
+
     .text :
     {
+        . = ALIGN(4);
+
         *(.text*)
         *(.rodata*)
 
@@ -21,6 +30,8 @@ SECTIONS
 
     .data :
     {
+        . = ALIGN(4);
+
         _sdata = .;
 
         *(.data*)
@@ -31,6 +42,8 @@ SECTIONS
 
     .bss :
     {
+        . = ALIGN(4);
+
         _sbss = .;
 
         *(.bss*)

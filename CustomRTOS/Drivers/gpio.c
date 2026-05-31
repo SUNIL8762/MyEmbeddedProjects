@@ -15,3 +15,4 @@ void gpio_toggle(void)
 {
     GPIOA_ODR ^= (1 << 5);
 }
+
