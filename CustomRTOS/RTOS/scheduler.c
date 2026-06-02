@@ -63,7 +63,8 @@ void init_tasks_stack(void)
 
         userTasks[i].pspValue = (uint32_t)psp;
 
-        psp -= SIZE_TASK_STACK;
+        /* Move to next task stack (1024 bytes) */
+        psp = (uint32_t*)((uint8_t*)psp - SIZE_TASK_STACK);
     }
 }
 
