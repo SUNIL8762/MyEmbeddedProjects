@@ -48,18 +48,45 @@ void init_tasks_stack(void)
 
         /* LR */
         *(--psp) = 0xFFFFFFFD;
+        /* R11 */
+        *(--psp) = 0;
 
-        /* R12,R3,R2,R1,R0 */
-        for(int j = 0; j < 5; j++)
-        {
-            *(--psp) = 0;
-        }
+        /* R10 */
+        *(--psp) = 0;
 
-        /* R11-R4 */
-        for(int j = 0; j < 8; j++)
-        {
-            *(--psp) = 0;
-        }
+        /* R9 */
+        *(--psp) = 0;
+
+        /* R8 */
+        *(--psp) = 0;
+
+        /* R7 */
+        *(--psp) = 0;
+
+        /* R6 */
+        *(--psp) = 0;
+
+        /* R5 */
+        *(--psp) = 0;
+
+        /* R4 */
+        *(--psp) = 0;
+
+        /* R12 */
+        *(--psp) = 0;
+
+        /* R3 */
+        *(--psp) = 0;
+
+        /* R2 */
+        *(--psp) = 0;
+
+        /* R1 */
+        *(--psp) = 0;
+
+        /* R0 */
+        *(--psp) = 0;
+
 
         userTasks[i].pspValue = (uint32_t)psp;
 

@@ -8,8 +8,6 @@ void task4_handler(void);
 
 TCB_t userTasks[MAX_TASKS];
 
-uint32_t taskStack[MAX_TASKS][SIZE_TASK_STACK];
-
 uint8_t currentTask = 1;
 uint32_t globalTickCount = 0;
 
@@ -18,13 +16,12 @@ int main(void)
     gpio_init();
     enable_processor_faults();
 
-    //init_scheduler_stack(T1_STACK_START);
+    init_scheduler_stack(SCHEDULER_STACK);
 
-    userTasks[0].taskHandler = idle_task;
-    userTasks[1].taskHandler = task1_handler;
-    userTasks[2].taskHandler = task2_handler;
-    userTasks[3].taskHandler = task3_handler;
-    userTasks[4].taskHandler = task4_handler;
+    userTasks[0].taskHandler = task1_handler;
+    userTasks[1].taskHandler = task2_handler;
+    userTasks[2].taskHandler = task3_handler;
+    userTasks[3].taskHandler = task4_handler;
 
     init_tasks_stack();
 

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define MAX_TASKS              5
+#define MAX_TASKS              4
 #define DUMMY_XPSR             0x01000000U
 #define SIZE_TASK_STACK        1024U
 #define TICK_HZ                1000U
@@ -15,7 +15,7 @@
 #define SYST_RVR               (*(volatile uint32_t*)0xE000E014)
 #define SYST_CVR               (*(volatile uint32_t*)0xE000E018)
 
-#define INT_CTRL               (*(volatile uint32_t*)0xE000ED04)
+#define INT_CTRL               (*(volatile uint32_t*)0xE000ED04) 
 #define SHPR3                  (*(volatile uint32_t*)0xE000ED20)
 
 #define PENDSV_SET_BIT         (1 << 28)
@@ -27,11 +27,13 @@
 #define SRAM_SIZE              (128 * 1024)
 #define SRAM_END               ((SRAM_START) + (SRAM_SIZE))
 
-#define T1_STACK_START         SRAM_END
-#define T2_STACK_START         (SRAM_END - SIZE_TASK_STACK)
-#define T3_STACK_START         (SRAM_END - (2 * SIZE_TASK_STACK))
-#define T4_STACK_START         (SRAM_END - (3 * SIZE_TASK_STACK))
-#define IDLE_STACK_START       (SRAM_END - (4 * SIZE_TASK_STACK))
+
+#define SCHEDULER_STACK  SRAM_END
+
+#define T1_STACK_START   (SCHEDULER_STACK - SIZE_TASK_STACK)
+#define T2_STACK_START   (T1_STACK_START - SIZE_TASK_STACK)
+#define T3_STACK_START   (T2_STACK_START - SIZE_TASK_STACK)
+#define T4_STACK_START   (T3_STACK_START - SIZE_TASK_STACK)
 uint32_t get_psp_value(void);
 void save_psp_value(uint32_t currentPspValue);
 void unblock_tasks(void);
